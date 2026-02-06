@@ -28,13 +28,16 @@ args = dotdict({
 
 })
 
+import swanlab
+swanlab.login(api_key="rdGaOSnlBY0KBDnNdkzja")
+swanlab = swanlab.init(project="Chess", logdir="logs")
 
 def main():
     log.info('Loading %s...', Game.__name__)
     g = Game(6)
 
     log.info('Loading %s...', nn.__name__)
-    nnet = nn(g)
+    nnet = nn(g, swanlab)
 
     if args.load_model:
         log.info('Loading checkpoint "%s/%s"...', args.load_folder_file[0], args.load_folder_file[1])
@@ -43,7 +46,7 @@ def main():
         log.warning('Not loading a checkpoint!')
 
     log.info('Loading the Coach...')
-    c = Coach(g, nnet, args)
+    c = Coach(g, nnet, args, swanlab)
 
     if args.load_model:
         log.info("Loading 'trainExamples' from file...")

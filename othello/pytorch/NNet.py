@@ -25,11 +25,11 @@ args = dotdict({
 
 
 class NNetWrapper(NeuralNet):
-    def __init__(self, game):
+    def __init__(self, game, swandb=None):
         self.nnet = onnet(game, args)
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
-
+        self.swandb = swandb
         if args.cuda:
             self.nnet.cuda()
 
@@ -64,7 +64,10 @@ class NNetWrapper(NeuralNet):
                 l_pi = self.loss_pi(target_pis, out_pi)
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v
-
+                if self.swandb:
+                    self.swandb.log({
+                        "策略损失": l_pi, "价值损失": l_v, "总损失": total_loss
+                    })
                 # record loss
                 pi_losses.update(l_pi.item(), boards.size(0))
                 v_losses.update(l_v.item(), boards.size(0))
