@@ -1,8 +1,7 @@
 import copy
 import numpy as np
-from game.chess.common import GAME_MAP, LENGTH_OF_BOARD, BLACK, WHITE, DISTANCE, get_neighbours, shiftOutChessman, \
+from chess.common import GAME_MAP, LENGTH_OF_BOARD, BLACK, WHITE, DISTANCE, get_neighbours, shiftOutChessman, \
     INDEX_TO_MOVE_DICT
-from game.abstract_state import AbstractState
 
 
 class ChessBoard:
@@ -14,7 +13,6 @@ class ChessBoard:
         self.init_distance()
         self.init_point_status()
         self.init_game_map()
-        self.is_simple = False
         self.draw_checker = {}
         self.reset_draw_checker()
         self.turn = 0
@@ -50,15 +48,15 @@ class ChessBoard:
     def init_game_map(self):
         self.gameMap = GAME_MAP
 
-    def get_legal_moves(self, player):
+    def get_legal_moves(self, pointStatus, player):
         assert player in [WHITE, BLACK]
         legal_moves_list = []
-        for from_point_idx, chessman in enumerate(self.pointStatus):
+        for from_point_idx, chessman in enumerate(pointStatus):
             if chessman != player:
                 continue
             to_point_idx_list = get_neighbours(from_point_idx, self.distance)
             for to_point_idx in to_point_idx_list:
-                to_point = self.pointStatus[to_point_idx]
+                to_point = pointStatus[to_point_idx]
                 if to_point != 0:
                     continue
                 legal_moves_list.append((from_point_idx, to_point_idx))
@@ -84,42 +82,28 @@ class ChessBoard:
         self.pointStatus = shiftOutChessman(
             bake_point_status, self.distance)
 
-    def check_winner(self, mock):
+    def check_winner(self, pointStatus, player):
 
         black_num = 0
         white_num = 0
-        winner = None
-        for color in self.pointStatus:
+        for color in pointStatus:
             if color == BLACK:
                 black_num += 1
             elif color == WHITE:
                 white_num += 1
-        if self.is_simple:
-            if white_num > black_num:
-                return WHITE
-            elif white_num < black_num:
-                return BLACK
-            return None
+
         if black_num < 3 or white_num < 3:
             if black_num < 3:
-                winner = WHITE
+                return 1 if player == WHITE else -1
             else:
-                winner = BLACK
+                return 1 if player == BLACK else -1
 
-        if winner:
-            return winner
-
-        if 'has' in self.draw_checker:
-            if mock:
-                print(f"用于调试 {self.draw_checker}")
-            return 0
-
-        if self.turn >= 200:
+        if 'has' in self.draw_checker or self.turn >= 200:
             if black_num == white_num:
                 return 0
             elif black_num > white_num:
-                return BLACK
+                return 1 if player == BLACK else -1
             else:
-                return WHITE
+                return 1 if player == WHITE else -1
 
-        return None
+        return 0

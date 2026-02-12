@@ -1,21 +1,19 @@
 import copy
 from collections import deque
+from pathlib import Path
 
 import cv2
 import numpy as np
 import torch
 
-from game.chess.chess_board import ChessBoard
-from game.chess.common import from_array_to_input_tensor, GAME_MAP, MOVE_TO_INDEX_DICT, INDEX_TO_MOVE_DICT, \
+from chess.chess_board import ChessBoard
+from chess.common import from_array_to_input_tensor, GAME_MAP, MOVE_TO_INDEX_DICT, INDEX_TO_MOVE_DICT, \
     MAX_HISTORY_STEPS
 
-from constants import ROOT_PATH
-from game.chess.symmetry_creator import lr, tb_, LEFT_ACTION_INDEX, RIGHT_ACTION_INDEX, TOP_ACTION_INDEX, \
+from chess.symmetry_creator import lr, tb_, LEFT_ACTION_INDEX, RIGHT_ACTION_INDEX, TOP_ACTION_INDEX, \
     BOTTOM_ACTION_INDEX
 
-debug_path = ROOT_PATH / "debug"
-if not debug_path.exists():
-    debug_path.mkdir()
+ROOT_PATH = Path(__file__).parent
 SCREEN_WIDTH = 580
 SCREEN_HEIGHT = 580
 CHESSMAN_WIDTH = 20
@@ -48,7 +46,7 @@ class Chess(ChessBoard):
         return x, y
 
     def _write_point(self):
-        image = cv2.imread(str(ROOT_PATH / "game/chess/assets/watermelon.png"))
+        image = cv2.imread(str(ROOT_PATH / "assets/watermelon.png"))
         for index, point in enumerate(self.pointStatus):
             if point == 0:
                 continue
@@ -154,6 +152,23 @@ class Chess(ChessBoard):
             new_pi = torch.from_numpy(new_pi).float()
 
         return new_board, new_pi
+
+    def stringRepresentation(self, board):
+        return board.tobytes()
+
+    def getActionSize(self):
+        return 72
+
+    def getGameEnded(self, board, player):
+        return self.check_winner(board, player)
+
+    def getValidMoves(self, board, player):
+        valids = [0] * self.getActionSize()
+        f_t_list = self.get_legal_moves(board, player)
+        for item in f_t_list:
+            idx = MOVE_TO_INDEX_DICT[item]
+            valids[idx] = 1
+        return np.array(valids)
 
 
 if __name__ == '__main__':
