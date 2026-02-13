@@ -65,6 +65,7 @@ ARRAY_TO_IMAGE = {
 }
 IMAGE_TO_ARRAY = {v: k for k, v in ARRAY_TO_IMAGE.items()}
 
+
 def from_torch_to_array(tensor):
     ret = [0] * 21
     for i in range(7):
@@ -74,8 +75,7 @@ def from_torch_to_array(tensor):
     return ret
 
 
-
-def from_array_to_input_tensor(point_status, current_player):
+def from_array_to_input(point_status):
     """
         :param point_status:
         :param current_player:
@@ -84,44 +84,18 @@ def from_array_to_input_tensor(point_status, current_player):
                                     第三个维度的第二个指示
                                     第三个维度的第二个为棋手
     """
-    is_cuda = True if torch.cuda.is_available() else False
-    if current_player not in [-1, 1]:
-        raise Exception('current_player must be -1 or 1')
-
-    if not isinstance(point_status, numpy.ndarray) and not isinstance(point_status, list):
-        raise Exception(f'point_status must be list or numpy.ndarray, type {type(point_status)}')
 
     if len(point_status) != 21:
         raise Exception('point_status length must be 21')
 
-    v = list(ARRAY_TO_IMAGE.values())
-    v_ind = np.stack(v)
-    state_not = np.ones((7, 7)) * 2
-    state_not[v_ind[:, 0], v_ind[:, 1]] = 0
+    input_ = np.zeros((7, 7), dtype=np.float32)
 
-    input_tensor = torch.zeros((7, 7, 3 + MAX_HISTORY_STEPS))
-
-    input_tensor[:, :, 0][state_not == 2] = 2
-    input_tensor[:, :, 1][state_not == 2] = 2
-    input_tensor[:, :, 2] = 1 if 1 == current_player else 0
     for i, chessman in enumerate(point_status):
         row, column = ARRAY_TO_IMAGE[i]
-        if chessman == current_player:
-            assert input_tensor[row, column, 0].item() != 2
-            input_tensor[row, column, 0] = 1
-        elif chessman == -current_player:
-            assert input_tensor[row, column, 1].item() != 2
-            input_tensor[row, column, 1] = 1
-        else:
-            assert chessman == 0
 
-    for i, last_action in enumerate(last_action_list):
-        if last_action != (-1, -1):
-            _, to = last_action
-            row, column = ARRAY_TO_IMAGE[to]
-            input_tensor[row, column, i + 3] = 1
+        input_[row][column] = chessman
 
-    return input_tensor.cuda() if is_cuda else input_tensor
+    return input_
 
 
 def write_image(name, image):

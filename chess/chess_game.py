@@ -1,15 +1,10 @@
 import copy
-from collections import deque
 from pathlib import Path
-
 import cv2
 import numpy as np
-import torch
 
 from chess.chess_board import ChessBoard
-from chess.common import from_array_to_input_tensor, GAME_MAP, MOVE_TO_INDEX_DICT, INDEX_TO_MOVE_DICT, \
-    MAX_HISTORY_STEPS
-
+from chess.common import from_array_to_input, GAME_MAP, MOVE_TO_INDEX_DICT, INDEX_TO_MOVE_DICT
 from chess.symmetry_creator import lr, tb_, LEFT_ACTION_INDEX, RIGHT_ACTION_INDEX, TOP_ACTION_INDEX, \
     BOTTOM_ACTION_INDEX
 
@@ -147,11 +142,17 @@ class Chess(ChessBoard):
         return self.init_point_status()
 
     def getSymmetries(self, board, pi):
+        board = from_array_to_input(board)
+        pi = np.array(pi)
         l = [(board, pi)]
-        nb, np = self.left_right(board, pi)
-        l += [(nb, np)]
-        nb, np = self.top_buttom(board, pi)
-        l += [(nb, np)]
-        nb, np = self.center(board, pi)
+        nb, npi = self.left_right(board, pi)
+        l += [(nb, npi)]
+        nb, npi = self.top_buttom(board, pi)
+        l += [(nb, npi)]
+        nb, npi = self.center(board, pi)
         l += [(nb, np)]
         return l
+
+    def getBoardSize(self):
+        # (a,b) tuple
+        return 7, 7

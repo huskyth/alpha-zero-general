@@ -3,7 +3,7 @@ import logging
 import coloredlogs
 
 from Coach import Coach
-from chess.chess import Chess as Game
+from chess.chess_game import Chess as Game
 from othello.pytorch.NNet import NNetWrapper as nn
 from utils import *
 

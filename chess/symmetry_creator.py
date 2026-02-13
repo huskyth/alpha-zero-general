@@ -3,7 +3,7 @@ import copy
 import numpy as np
 import torch
 
-from game.chess.common import MOVE_LIST, MOVE_TO_INDEX_DICT
+from chess.common import MOVE_LIST, MOVE_TO_INDEX_DICT
 
 LEFT_RIGHT_POINT_MAP = {
     0: 0, 1: 3, 3: 1, 2: 2, 4: 8, 8: 4, 6: 10, 10: 6, 5: 9, 9: 5, 16: 16, 17: 18, 18: 17,
