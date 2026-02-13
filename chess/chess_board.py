@@ -28,15 +28,16 @@ class ChessBoard:
         self.distance = DISTANCE
 
     def init_point_status(self):
-        self.pointStatus = []
+        pointStatus = []
         black = [0, 1, 2, 3, 4, 8]
         white = [7, 11, 12, 13, 14, 15]
         for x in range(LENGTH_OF_BOARD):
-            self.pointStatus.append(0)
+            pointStatus.append(0)
         for x in black:
-            self.pointStatus[x] = BLACK
+            pointStatus[x] = BLACK
         for x in white:
-            self.pointStatus[x] = WHITE
+            pointStatus[x] = WHITE
+        return np.array(pointStatus)
 
     def init_game_map(self):
         self.gameMap = GAME_MAP

@@ -98,14 +98,8 @@ class Chess(ChessBoard):
         return max_act
 
     def top_buttom(self, s, p):
-        board = s
-        pi = p
-        new_board, new_pi = tb_(board, pi)
-        if isinstance(new_board, np.ndarray):
-            new_board = torch.from_numpy(new_board).float()
-        if isinstance(new_pi, np.ndarray):
-            new_pi = torch.from_numpy(new_pi).float()
-        return new_board, new_pi
+        new_board, new_pi = tb_(s, p)
+        return new_board, new_pi.tolist()
 
     def image_show(self, key, is_image_show, wait_key=5):
         if not is_image_show:
@@ -115,26 +109,13 @@ class Chess(ChessBoard):
         return cv2.waitKey(wait_key)
 
     def left_right(self, s, p):
-        board = s
-        pi = p
-        new_board, new_pi = lr(board, pi)
-        if isinstance(new_board, np.ndarray):
-            new_board = torch.from_numpy(new_board).float()
-        if isinstance(new_pi, np.ndarray):
-            new_pi = torch.from_numpy(new_pi).float()
-        return new_board, new_pi
+        new_board, new_pi = lr(s, p)
+        return new_board, new_pi.tolist()
 
     def center(self, s, p):
-        board = s
-        pi = p
-        new_board, new_pi = lr(board, pi)
+        new_board, new_pi = lr(s, p)
         new_board, new_pi = tb_(new_board, new_pi)
-        if isinstance(new_board, np.ndarray):
-            new_board = torch.from_numpy(new_board).float()
-        if isinstance(new_pi, np.ndarray):
-            new_pi = torch.from_numpy(new_pi).float()
-
-        return new_board, new_pi
+        return new_board, new_pi.tolist()
 
     def stringRepresentation(self, board):
         return board.tobytes()
@@ -161,3 +142,16 @@ class Chess(ChessBoard):
         ret_board = self.execute_move(action, player, board_)
         assert id(ret_board) != id(board)
         return ret_board, -player
+
+    def getInitBoard(self):
+        return self.init_point_status()
+
+    def getSymmetries(self, board, pi):
+        l = [(board, pi)]
+        nb, np = self.left_right(board, pi)
+        l += [(nb, np)]
+        nb, np = self.top_buttom(board, pi)
+        l += [(nb, np)]
+        nb, np = self.center(board, pi)
+        l += [(nb, np)]
+        return l
