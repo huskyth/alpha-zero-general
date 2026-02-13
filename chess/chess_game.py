@@ -144,13 +144,13 @@ class Chess(ChessBoard):
     def getSymmetries(self, board, pi):
         board = from_array_to_input(board)
         pi = np.array(pi)
-        l = [(board, pi)]
+        l = [(board, pi.tolist())]
         nb, npi = self.left_right(board, pi)
         l += [(nb, npi)]
         nb, npi = self.top_buttom(board, pi)
         l += [(nb, npi)]
         nb, npi = self.center(board, pi)
-        l += [(nb, np)]
+        l += [(nb, npi)]
         return l
 
     def getBoardSize(self):
