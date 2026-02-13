@@ -118,8 +118,8 @@ class Chess(ChessBoard):
     def getActionSize(self):
         return 72
 
-    def getGameEnded(self, board, player):
-        return self.check_winner(board, player)
+    def getGameEnded(self, board, player, depth):
+        return self.check_winner(board, player, depth)
 
     def getValidMoves(self, board, player):
         valids = [0] * self.getActionSize()

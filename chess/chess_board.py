@@ -74,7 +74,7 @@ class ChessBoard:
         bake_point_status = copy.deepcopy(pointStatus)
         return shiftOutChessman(bake_point_status, self.distance)
 
-    def check_winner(self, pointStatus, player):
+    def check_winner(self, pointStatus, player, depth):
 
         black_num = 0
         white_num = 0
@@ -90,9 +90,9 @@ class ChessBoard:
             else:
                 return 1 if player == BLACK else -1
 
-        if self.turn >= 200:
+        if depth >= 200:
             if black_num == white_num:
-                return 0
+                return 1e-5
             elif black_num > white_num:
                 return 1 if player == BLACK else -1
             else:
