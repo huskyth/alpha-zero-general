@@ -13,14 +13,7 @@ class ChessBoard:
         self.init_distance()
         self.init_point_status()
         self.init_game_map()
-        self.draw_checker = {}
-        self.reset_draw_checker()
         self.turn = 0
-
-    def reset_draw_checker(self):
-        str_point = [str(t) for t in self.pointStatus] + [str(self.get_current_player())]
-        str_point = "".join(str_point)
-        self.draw_checker = {}
 
     def get_game_map(self):
         return self.gameMap
@@ -62,7 +55,7 @@ class ChessBoard:
                 legal_moves_list.append((from_point_idx, to_point_idx))
         return legal_moves_list
 
-    def execute_move(self, move, color):
+    def execute_move(self, move, player, pointStatus):
         self.turn += 1
         if isinstance(move, int):
             move = INDEX_TO_MOVE_DICT[move]
@@ -71,16 +64,14 @@ class ChessBoard:
             move = INDEX_TO_MOVE_DICT[int(move)]
 
         from_int, to_int = move
-        self.last_action.appendleft((from_int, to_int))
-        assert color == WHITE or color == BLACK
-        assert self.pointStatus[from_int] == color
-        assert self.pointStatus[to_int] == 0
+        assert player == WHITE or player == BLACK
+        assert pointStatus[from_int] == player
+        assert pointStatus[to_int] == 0
         assert self.distance[from_int][to_int] == 1
-        self.pointStatus[from_int] = 0
-        self.pointStatus[to_int] = color
-        bake_point_status = copy.deepcopy(self.pointStatus)
-        self.pointStatus = shiftOutChessman(
-            bake_point_status, self.distance)
+        pointStatus[from_int] = 0
+        pointStatus[to_int] = player
+        bake_point_status = copy.deepcopy(pointStatus)
+        return shiftOutChessman(bake_point_status, self.distance)
 
     def check_winner(self, pointStatus, player):
 
@@ -98,7 +89,7 @@ class ChessBoard:
             else:
                 return 1 if player == BLACK else -1
 
-        if 'has' in self.draw_checker or self.turn >= 200:
+        if self.turn >= 200:
             if black_num == white_num:
                 return 0
             elif black_num > white_num:

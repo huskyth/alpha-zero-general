@@ -30,7 +30,6 @@ class Chess(ChessBoard):
         self.move_to_index = MOVE_TO_INDEX_DICT
         self.index_to_move = INDEX_TO_MOVE_DICT
         self.is_render = is_render
-        self.last_action = deque(maxlen=MAX_HISTORY_STEPS)
 
     def is_end(self, mock=False):
         winner = self.check_winner(mock)
@@ -80,22 +79,8 @@ class Chess(ChessBoard):
             得到棋盘的张量
             :return:
         """
-        state = from_array_to_input_tensor(self.pointStatus, self.current_player, self.last_action)
+        state = from_array_to_input_tensor(self.pointStatus, self.current_player)
         return state
-
-    def do_action(self, action):
-        self.execute_move(action, self.current_player)
-        self.current_player *= -1
-
-        str_point = [str(t) for t in self.pointStatus] + [str(self.get_current_player())]
-        str_point = "".join(str_point)
-
-        if str_point not in self.draw_checker:
-            self.draw_checker[str_point] = 1
-        else:
-            self.draw_checker[str_point] += 1
-            if self.draw_checker[str_point] == MAX_DRAW_TIME:
-                self.draw_checker['has'] = True
 
     def get_current_player(self):
         return self.current_player
@@ -103,8 +88,6 @@ class Chess(ChessBoard):
     def reset(self, start_player=1):
         self.init_point_status()
         self.current_player = start_player
-        self.last_action = deque(maxlen=MAX_HISTORY_STEPS)
-        self.reset_draw_checker()
         self.turn = 0
 
     def move_random(self):
@@ -170,44 +153,11 @@ class Chess(ChessBoard):
             valids[idx] = 1
         return np.array(valids)
 
+    def getCanonicalForm(self, board, player):
+        return player * board
 
-if __name__ == '__main__':
-    abv = [1, 2, 3, 4]
-    print(np.random.shuffle(abv))
-    print(abv)
-    import os
-
-    op = np.array([0.1, 0.14, 0.4, 0, 0, 0.34, 0.07, 0.05, 0, 0.05, 0, 0, 0, 0.03])
-    print(np.sum(op))
-    sta = Chess()
-
-    legal_moves = list(sta.get_legal_moves(sta.get_current_player()))
-    noise = 0.1 * np.random.dirichlet(0.03 * np.ones(np.count_nonzero(legal_moves)))
-
-    prob = 0.9 * op
-    j = 0
-    for i in range(len(prob)):
-        if legal_moves[i] == 1:
-            prob[i] += noise[j]
-            j += 1
-    prob /= np.sum(prob)
-
-    # sta.do_action((15, 12))
-    # sta.do_action((0, 3))
-    # sta.do_action((13, 15))
-    # sta.do_action((1, 0))
-    # sta.do_action((11, 10))
-
-    # print(os.name)
-    # s = sta.get_torch_state()
-    # print(s[:, :, 0])
-    # print(s[:, :, 1])
-    # print(s[:, :, 2])
-    # print(s[:, :, 3])
-    # print(s[:, :, 4])
-    # print(s[:, :, 5])
-    # print(s[:, :, 6])
-    # print(s[:, :, 7])
-    # print(s[:, :, 8])
-    # print(s[:, :, 9])
-    # print(s[:, :, 10])
+    def getNextState(self, board, player, action):
+        board_ = copy.deepcopy(board)
+        ret_board = self.execute_move(action, player, board_)
+        assert id(ret_board) != id(board)
+        return ret_board, -player

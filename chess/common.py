@@ -75,7 +75,7 @@ def from_torch_to_array(tensor):
 
 
 
-def from_array_to_input_tensor(point_status, current_player, last_action_list):
+def from_array_to_input_tensor(point_status, current_player):
     """
         :param point_status:
         :param current_player:
