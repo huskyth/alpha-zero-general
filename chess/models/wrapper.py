@@ -51,8 +51,13 @@ class Wrapper:
 
     @torch.no_grad()
     def predict(self, state):
-        v, p = self.net(state)
-        return v.detach().cpu().numpy(), (torch.e ** p).detach().cpu().numpy()[0]
+        self.eval()
+        board = torch.FloatTensor(state.astype(np.float64))
+        if self.is_cuda:
+            board = board.contiguous().cuda()
+        board = board.view(1, 7, 7)
+        v, p = self.net(board)
+        return v.detach().cpu().numpy(), (torch.exp(p)).detach().cpu().numpy()[0]
 
     def train_net(self, train_sample, swanlab):
         self.train()
@@ -68,7 +73,7 @@ class Wrapper:
             t = tqdm(range(batch_number), desc='Training Net')
             for _ in t:
                 sample_ids = np.random.randint(n, size=self.batch)
-                s, p, _, r = list(zip(*[train_sample[i] for i in sample_ids]))
+                s, p, r = list(zip(*[train_sample[i] for i in sample_ids]))
 
                 boards = torch.FloatTensor(np.array(s, dtype=np.float64))
                 target_pis = torch.FloatTensor(np.array(p))
@@ -87,11 +92,6 @@ class Wrapper:
                 self.opt.zero_grad()
                 total_loss.backward()
                 self.opt.step()
-
-            return_dict.append({
-                "value_loss_avg": value_loss_avg, "probability_loss_avg": probability_loss_avg, "entropy_p_avg":
-                    entropy_p_avg
-            })
 
         return return_dict
 

@@ -1,7 +1,9 @@
-from constants import ROOT_PATH
-from game.chess.common import MAX_HISTORY_STEPS
-from models.models import GameNet
-from models.wrapper import Wrapper
+from pathlib import Path
+
+ROOT_PATH = Path(__file__).parent.parent.parent
+from chess.common import MAX_HISTORY_STEPS
+from chess.models.models import GameNet
+from chess.models.wrapper import Wrapper
 
 
 class ChessNetWrapper(Wrapper):
@@ -17,6 +19,7 @@ class ChessNetWrapper(Wrapper):
 if __name__ == '__main__':
     import swanlab
     from pickle import Pickler, Unpickler
+
     with open(ChessNetWrapper.MODEL_SAVE_PATH / "train_history.examples", "rb") as f:
         temp = Unpickler(f).load()
     c = ChessNetWrapper()
@@ -24,6 +27,7 @@ if __name__ == '__main__':
     swan = swanlab.init(project="ChessGameSP", logdir=ROOT_PATH / "logs")
     train_sample = []
     import numpy as np
+
     np.random.shuffle(train_sample)
     for x in temp:
         train_sample.extend(x)
