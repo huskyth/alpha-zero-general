@@ -27,6 +27,23 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
+    def print(self, canonicalBoard):
+        s = self.game.stringRepresentation(canonicalBoard)
+        valids = self.Vs[s]
+        print(f"{from_array_to_input(canonicalBoard)}")
+        for a in range(self.game.getActionSize()):
+            if valids[a]:
+                if (s, a) in self.Qsa:
+                    print(f"q_sa(s, {self.game.index_to_move[a]}) = {self.Qsa[(s, a)]}")
+
+        for s in self.Es:
+            if self.Es[s] != 0:
+                print(f"{'-' * 5}分割线{'-' * 5}")
+                print(f"{from_array_to_input(np.frombuffer(s, dtype=canonicalBoard.dtype))} \n {self.Es[s]}")
+                print(f"{'-' * 5}分割线{'-' * 5}")
+
+        print(f"{'-' * 50}分割线{'-' * 50}")
+
     def getActionProb(self, canonicalBoard, temp=1):
         """
         This function performs numMCTSSims simulations of MCTS starting from

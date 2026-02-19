@@ -181,6 +181,7 @@ class WMChessGUI:
                     self.board, self.current_player = self.play_state.getNextState(self.board, self.current_player,
                                                                                    action)
                     self.is_human = True
+                    self.mcts_player.print(x)
 
                 # draw
                 self._draw_background()
@@ -242,7 +243,7 @@ if __name__ == '__main__':
     g = Game()
     n1 = NNet(g)
     n1.load_checkpoint('/Users/tenghao/Desktop/alpha-zero-general/temp', 'best.pth.tar')
-    args1 = dotdict({'numMCTSSims': 400, 'cpuct': 1.0})
+    args1 = dotdict({'numMCTSSims': 800, 'cpuct': 1.0})
     mcts1 = MCTS(g, n1, args1)
     wm = WMChessGUI(mcts1, g)
     wm.start()
