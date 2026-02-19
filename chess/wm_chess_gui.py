@@ -3,15 +3,15 @@ import threading
 import pygame
 import os
 
-import torch
+from utils import dotdict
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import numpy as np
 
-from .common import shiftOutChessman, DISTANCE, GAME_MAP
+from chess.common import shiftOutChessman, DISTANCE, GAME_MAP
 import copy
 
-from .common import MOVE_TO_INDEX_DICT
+from chess.common import MOVE_TO_INDEX_DICT
 
 BLACK = 1
 WHITE = -1
@@ -48,6 +48,8 @@ class WMChessGUI:
 
         self.mcts_player = mcts_player
         self.play_state = play_state
+
+        self.current_player = 1
 
     def __del__(self):
         # close window
@@ -94,7 +96,7 @@ class WMChessGUI:
         from_int, to_int = move
         print(f"🌿 exec {from_int} to {to_int}")
         assert color == WHITE or color == BLACK
-        assert self.board[from_int] == color
+        assert self.board[from_int] == color, f"{self.board[from_int]}, {color}, {self.board}"
         assert self.board[to_int] == 0
         assert DISTANCE[from_int][to_int] == 1
         self.board[from_int] = 0
@@ -162,11 +164,11 @@ class WMChessGUI:
                                     DISTANCE[self.chosen_chessman][chessman] == 1:
 
                                 self.human_move = (self.chosen_chessman, chessman)
-                                self.execute_move(self.human_color, self.human_move, "人类玩家")
                                 self.human_move = MOVE_TO_INDEX_DICT[self.human_move]
-                                self.mcts_player.update_tree(self.human_move)
                                 self.set_is_human(False)
-                                self.play_state.do_action(self.human_move)
+                                self.board, self.current_player = self.play_state.getNextState(self.board,
+                                                                                               self.current_player,
+                                                                                               self.human_move)
                             else:
                                 self.board[
                                     self.chosen_chessman] = self.chosen_chessman_color
@@ -174,21 +176,10 @@ class WMChessGUI:
                             # draw
 
                 else:
-                    pi = self.mcts_player.get_action_probability(self.play_state, False)
-                    move_idx = np.argmax(pi)
-                    state = self.play_state.get_torch_state()
-                    v, p = self.mcts_player.predict(state)
-                    print(f"当前玩家 {self.play_state.get_current_player()} 的 MCTS 模拟概率为:\n\n {pi} \n\n "
-                          f"直接预测的价值为 {v} \n\n"
-                          f"直接预测的概率为 \n\n {p} \n\n"
-                          f"直接预测会选择的行为 {np.argmax(p)} ，蒙特卡洛预测行为 {move_idx}\n\n"
-                          f"当前第一维度：\n\n {state[:, :, 0]}\n\n\n"
-                          f"当前第二维度：\n\n {state[:, :, 1]}\n\n\n"
-                          f"当前第三维度：\n\n {state[:, :, 2]}\n\n\n")
-                    self.mcts_player.update_tree(move_idx)
-                    move = self.play_state.index_to_move[move_idx]
-                    self.execute_move(-self.human_color, move, info="AI")
-                    self.play_state.do_action(move)
+                    x = self.play_state.getCanonicalForm(self.board, self.current_player)
+                    action = np.argmax(self.mcts_player.getActionProb(x, temp=0))
+                    self.board, self.current_player = self.play_state.getNextState(self.board, self.current_player,
+                                                                                   action)
                     self.is_human = True
 
                 # draw
@@ -228,10 +219,30 @@ class WMChessGUI:
             if point == 0:
                 continue
             (x, y) = WMChessGUI.fix_xy(index)
+            color = [0, 0, 0] if point == BLACK else [255, 0, 0]
+            if self.chessman_in_hand:
+                if index == self.chosen_chessman:
+                    color[1] += 126
+            color = tuple(color)
+
             if point == BLACK:
-                pygame.draw.circle(self.screen, (0, 0, 0), (int(x + CHESSMAN_WIDTH / 2), int(y + CHESSMAN_HEIGHT / 2)),
+                pygame.draw.circle(self.screen, color, (int(x + CHESSMAN_WIDTH / 2), int(y + CHESSMAN_HEIGHT / 2)),
                                    int(CHESSMAN_HEIGHT // 2 * 1.5))
             elif point == WHITE:
-                pygame.draw.circle(self.screen, (255, 0, 0),
+                pygame.draw.circle(self.screen, color,
                                    (int(x + CHESSMAN_WIDTH / 2), int(y + CHESSMAN_HEIGHT / 2)),
                                    int(CHESSMAN_HEIGHT // 2 * 1.5))
+
+
+if __name__ == '__main__':
+    from othello.pytorch.NNet import NNetWrapper as NNet
+    from chess.chess_game import Chess as Game
+    from MCTS import MCTS
+
+    g = Game()
+    n1 = NNet(g)
+    n1.load_checkpoint('/Users/tenghao/Desktop/alpha-zero-general/temp', 'best.pth.tar')
+    args1 = dotdict({'numMCTSSims': 400, 'cpuct': 1.0})
+    mcts1 = MCTS(g, n1, args1)
+    wm = WMChessGUI(mcts1, g)
+    wm.start()

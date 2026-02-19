@@ -8,7 +8,6 @@ class ChessBoard:
 
     def __init__(self):
         self.gameMap = []
-        self.pointStatus = []
         self.distance = []
         self.init_distance()
         self.init_point_status()
@@ -17,9 +16,6 @@ class ChessBoard:
 
     def get_game_map(self):
         return self.gameMap
-
-    def get_point_status(self):
-        return self.pointStatus
 
     def get_distance(self):
         return self.distance
@@ -61,7 +57,7 @@ class ChessBoard:
         if isinstance(move, int):
             move = INDEX_TO_MOVE_DICT[move]
 
-        if isinstance(move, np.int32):
+        if isinstance(move, np.int32) or isinstance(move, np.int64):
             move = INDEX_TO_MOVE_DICT[int(move)]
 
         from_int, to_int = move
