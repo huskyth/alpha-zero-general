@@ -82,16 +82,16 @@ class ChessBoard:
 
         if black_num < 3 or white_num < 3:
             if black_num < 3:
-                return 1, (white_num - black_num) * const if player == WHITE else -1, (black_num - white_num) * const
+                return (1, (white_num - black_num) * const) if player == WHITE else (-1, (black_num - white_num) * const)
             else:
-                return 1, (black_num - white_num) * const if player == BLACK else -1, (white_num - black_num) * const
+                return (1, (black_num - white_num) * const) if player == BLACK else (-1, (white_num - black_num) * const)
 
         if depth >= 400:
             if black_num == white_num:
                 return -1e-5, 0
             elif black_num > white_num:
-                return 1, (black_num - white_num) * const if player == BLACK else -1, (white_num - black_num) * const
+                return (1, (black_num - white_num) * const) if player == BLACK else (-1, (white_num - black_num) * const)
             else:
-                return 1, (white_num - black_num) * const if player == WHITE else -1, (black_num - white_num) * const
+                return (1, (white_num - black_num) * const) if player == WHITE else (-1, (black_num - white_num) * const)
 
-        return 0, None
+        return 0, 0
