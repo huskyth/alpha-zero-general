@@ -8,7 +8,7 @@ from utils import dotdict
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import numpy as np
 
-from chess.common import shiftOutChessman, DISTANCE, GAME_MAP
+from chess.common import shiftOutChessman, DISTANCE, GAME_MAP, from_array_to_input
 import copy
 
 from chess.common import MOVE_TO_INDEX_DICT
@@ -147,7 +147,6 @@ class WMChessGUI:
                 # human play
                 if self.is_human:
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        print("🌿 Mouse button down")
                         mouse_x, mouse_y = pygame.mouse.get_pos()
                         chessman = self._chosen_chessman(mouse_x, mouse_y)
                         if chessman is None:
@@ -157,7 +156,6 @@ class WMChessGUI:
                                 self.chosen_chessman_color = self.board[chessman]
                                 self.chessman_in_hand = True
                                 self.chosen_chessman = chessman
-                                print(f"🌿 chessman in hand human_color is {self.human_color}")
 
                         else:
                             if self.board[chessman] == 0 and \
@@ -166,9 +164,13 @@ class WMChessGUI:
                                 self.human_move = (self.chosen_chessman, chessman)
                                 self.human_move = MOVE_TO_INDEX_DICT[self.human_move]
                                 self.set_is_human(False)
-                                self.board, self.current_player, _ = self.play_state.getNextState(self.board,
+                                self.board, self.current_player, count = self.play_state.getNextState(self.board,
                                                                                                self.current_player,
                                                                                                self.human_move)
+                                _, v = n1.predict(from_array_to_input(self.play_state.getCanonicalForm(self.board, self.human_color)))
+                                print(f"当前Human Color是{self.human_color}, v = {v}, 吃了 {count} 个子")
+                                _, v = n1.predict(from_array_to_input(self.play_state.getCanonicalForm(self.board, -self.human_color)))
+                                print(f"当前AI Color是{-self.human_color}, v = {v}")
                             else:
                                 self.board[
                                     self.chosen_chessman] = self.chosen_chessman_color
@@ -182,7 +184,7 @@ class WMChessGUI:
                                                                                    action)
                     self.is_human = True
                     print(f"🌿 吃了 {c} 个子")
-                    self.mcts_player.print(x)
+                    # self.mcts_player.print(x)
 
                 # draw
                 self._draw_background()
@@ -195,7 +197,6 @@ class WMChessGUI:
         x, y = x / (SCREEN_WIDTH + 0.0), y / (SCREEN_HEIGHT + 0.0)
         for point in range(21):
             if abs(x - GAME_MAP[point][0]) < 0.05 and abs(y - GAME_MAP[point][1]) < 0.05:
-                print(f"🌿 choose {point}")
                 return point
         return None
 
@@ -244,7 +245,7 @@ if __name__ == '__main__':
     g = Game()
     n1 = NNet(g)
     n1.load_checkpoint('/Users/tenghao/Desktop/alpha-zero-general/temp', 'best.pth.tar')
-    args1 = dotdict({'numMCTSSims': 800, 'cpuct': 2.0})
+    args1 = dotdict({'numMCTSSims': 25, 'cpuct': 2.0})
     mcts1 = MCTS(g, n1, args1)
     wm = WMChessGUI(mcts1, g)
     wm.start()

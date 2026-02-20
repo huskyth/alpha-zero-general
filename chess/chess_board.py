@@ -86,7 +86,7 @@ class ChessBoard:
             else:
                 return (1, (black_num - white_num) * const) if player == BLACK else (-1, (white_num - black_num) * const)
 
-        if depth >= 400:
+        if depth >= 100:
             if black_num == white_num:
                 return -1e-5, 0
             elif black_num > white_num:
