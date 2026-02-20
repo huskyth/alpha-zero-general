@@ -50,7 +50,7 @@ class Coach():
         board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
-
+        all_count = 0
         while True:
             episodeStep += 1
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
@@ -62,15 +62,18 @@ class Coach():
                 trainExamples.append([b, self.curPlayer, p, None])
 
             action = np.random.choice(len(pi), p=pi)
-            board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
-
-            r = self.game.getGameEnded(board, self.curPlayer, episodeStep)
+            board, self.curPlayer, count = self.game.getNextState(board, self.curPlayer, action)
+            mid_re = -0.1 if count == 0 else count * 0.12
+            all_count += count
+            for i in range(len(sym)):
+                trainExamples[-i - 1][-1] = mid_re
+            r, det = self.game.getGameEnded(board, self.curPlayer, episodeStep)
 
             if r != 0:
                 self.swandb.log({
-                    "steps": episodeStep, "r": r
+                    "steps": episodeStep, "r": r, "吃子数": all_count
                 })
-                return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                return [(x[0], x[2], x[3] + (r + det) * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 
     def learn(self):
         """

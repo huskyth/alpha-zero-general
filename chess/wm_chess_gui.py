@@ -166,7 +166,7 @@ class WMChessGUI:
                                 self.human_move = (self.chosen_chessman, chessman)
                                 self.human_move = MOVE_TO_INDEX_DICT[self.human_move]
                                 self.set_is_human(False)
-                                self.board, self.current_player = self.play_state.getNextState(self.board,
+                                self.board, self.current_player, _ = self.play_state.getNextState(self.board,
                                                                                                self.current_player,
                                                                                                self.human_move)
                             else:
@@ -178,9 +178,10 @@ class WMChessGUI:
                 else:
                     x = self.play_state.getCanonicalForm(self.board, self.current_player)
                     action = np.argmax(self.mcts_player.getActionProb(x, temp=0))
-                    self.board, self.current_player = self.play_state.getNextState(self.board, self.current_player,
+                    self.board, self.current_player, c = self.play_state.getNextState(self.board, self.current_player,
                                                                                    action)
                     self.is_human = True
+                    print(f"🌿 吃了 {c} 个子")
                     self.mcts_player.print(x)
 
                 # draw
@@ -243,7 +244,7 @@ if __name__ == '__main__':
     g = Game()
     n1 = NNet(g)
     n1.load_checkpoint('/Users/tenghao/Desktop/alpha-zero-general/temp', 'best.pth.tar')
-    args1 = dotdict({'numMCTSSims': 800, 'cpuct': 1.0})
+    args1 = dotdict({'numMCTSSims': 800, 'cpuct': 2.0})
     mcts1 = MCTS(g, n1, args1)
     wm = WMChessGUI(mcts1, g)
     wm.start()

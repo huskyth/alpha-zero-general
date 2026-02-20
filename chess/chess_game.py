@@ -136,7 +136,8 @@ class Chess(ChessBoard):
         board_ = copy.deepcopy(board)
         ret_board = self.execute_move(action, player, board_)
         assert id(ret_board) != id(board)
-        return ret_board, -player
+        det = abs(board_[board_ == -player].sum().item()) - abs(ret_board[ret_board == -player].sum().item())
+        return ret_board, -player, abs(det)
 
     def getInitBoard(self):
         return self.init_point_status()
@@ -156,3 +157,10 @@ class Chess(ChessBoard):
     def getBoardSize(self):
         # (a,b) tuple
         return 7, 7
+
+
+if __name__ == '__main__':
+    g = Chess()
+    intb = g.getInitBoard()
+    _, _, c = g.getNextState(intb, 1, 9)
+    print(c)

@@ -71,7 +71,7 @@ class ChessBoard:
         return shiftOutChessman(bake_point_status, self.distance)
 
     def check_winner(self, pointStatus, player, depth):
-
+        const = 0.12
         black_num = 0
         white_num = 0
         for color in pointStatus:
@@ -82,16 +82,16 @@ class ChessBoard:
 
         if black_num < 3 or white_num < 3:
             if black_num < 3:
-                return 1 if player == WHITE else -1
+                return 1, (white_num - black_num) * const if player == WHITE else -1, (black_num - white_num) * const
             else:
-                return 1 if player == BLACK else -1
+                return 1, (black_num - white_num) * const if player == BLACK else -1, (white_num - black_num) * const
 
         if depth >= 400:
             if black_num == white_num:
-                return 1e-5
+                return -1e-5, 0
             elif black_num > white_num:
-                return 1 if player == BLACK else -1
+                return 1, (black_num - white_num) * const if player == BLACK else -1, (white_num - black_num) * const
             else:
-                return 1 if player == WHITE else -1
+                return 1, (white_num - black_num) * const if player == WHITE else -1, (black_num - white_num) * const
 
-        return 0
+        return 0, None

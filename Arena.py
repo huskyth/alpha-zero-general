@@ -46,7 +46,7 @@ class Arena():
             if hasattr(player, "startGame"):
                 player.startGame()
 
-        while self.game.getGameEnded(board, curPlayer, it) == 0:
+        while self.game.getGameEnded(board, curPlayer, it)[0] == 0:
             it += 1
             if verbose:
                 assert self.display
@@ -66,7 +66,7 @@ class Arena():
             if hasattr(opponent, "notify"):
                 opponent.notify(board, action)
 
-            board, curPlayer = self.game.getNextState(board, curPlayer, action)
+            board, curPlayer, _ = self.game.getNextState(board, curPlayer, action)
 
         for player in players[0], players[2]:
             if hasattr(player, "endGame"):
@@ -77,7 +77,7 @@ class Arena():
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
         # TODO:// 存疑但是问题不大
-        return curPlayer * self.game.getGameEnded(board, curPlayer, it)
+        return curPlayer * self.game.getGameEnded(board, curPlayer, it)[0]
 
     def playGames(self, num, verbose=False):
         """

@@ -93,8 +93,9 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
-        self.Es[s] = self.game.getGameEnded(canonicalBoard, 1, depth)
-        if self.Es[s] != 0:
+        r, det = self.game.getGameEnded(canonicalBoard, 1, depth)
+        self.Es[s] = r + det
+        if r != 0:
             # terminal node
             return -self.Es[s]
 
@@ -138,10 +139,11 @@ class MCTS():
                     best_act = a
 
         a = best_act
-        next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
+        next_s, next_player, count = self.game.getNextState(canonicalBoard, 1, a)
+        mid_r = -0.1 if count == 0 else count * 0.12
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        v = self.search(next_s, depth + 1)
+        v = self.search(next_s, depth + 1) + mid_r
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
