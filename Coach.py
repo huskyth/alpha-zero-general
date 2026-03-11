@@ -30,6 +30,8 @@ class Coach():
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
 
+        self.draw_stat = 0
+
     def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
@@ -67,13 +69,19 @@ class Coach():
             all_count += count
             for i in range(len(sym)):
                 trainExamples[-i - 1][-1] = mid_re
-            r, det = self.game.getGameEnded(board, self.curPlayer, episodeStep)
+            r = self.game.getGameEnded(board, self.curPlayer, episodeStep)
 
             if r != 0:
+                if r not in [1, -1]:
+                    self.draw_stat += 1
+                    self.swandb.log({
+                        "和棋次数": self.draw_stat
+                    })
+                    return []
                 self.swandb.log({
                     "steps": episodeStep, "r": r, "吃子数": all_count
                 })
-                return [(x[0], x[2], x[3] + (r + det) * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+                return [(x[0], x[2], x[3] + r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
 
     def learn(self):
         """

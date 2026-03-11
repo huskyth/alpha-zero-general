@@ -54,7 +54,7 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         for i in range(self.args.numMCTSSims):
-            self.search(canonicalBoard, 1)
+            self.search(canonicalBoard, 1, True)
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
@@ -71,7 +71,7 @@ class MCTS():
         probs = [x / counts_sum for x in counts]
         return probs
 
-    def search(self, canonicalBoard, depth):
+    def search(self, canonicalBoard, depth, isRootNode):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -93,8 +93,8 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
-        r, det = self.game.getGameEnded(canonicalBoard, 1, depth)
-        self.Es[s] = r + det
+        r = self.game.getGameEnded(canonicalBoard, 1, depth)
+        self.Es[s] = r
         if r != 0:
             # terminal node
             return -self.Es[s]
@@ -125,14 +125,26 @@ class MCTS():
         cur_best = -float('inf')
         best_act = -1
 
+        e = self.args.epsilon
+        if isRootNode and e > 0:
+            assert False
+            noise = np.random.dirichlet([self.args.dirAlpha] * len(self.game.filter_legal_moves(canonicalBoard)))
+
+        i = -1
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
             if valids[a]:
+                i += 1
+
+                p = self.Ps[s][a]
+                if isRootNode and e > 0:
+                    p = (1 - e) * p + e * noise[i]
+
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
+                    u = self.Qsa[(s, a)] + self.args.cpuct * p * math.sqrt(self.Ns[s]) / (
                             1 + self.Nsa[(s, a)])
                 else:
-                    u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
+                    u = self.args.cpuct * p * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u
@@ -143,7 +155,7 @@ class MCTS():
         mid_r = -0.1 if count == 0 else count * 0.12
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        v = self.search(next_s, depth + 1) + mid_r
+        v = self.search(next_s, depth + 1, False) + mid_r
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)

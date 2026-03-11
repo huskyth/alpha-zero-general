@@ -115,6 +115,10 @@ class Chess(ChessBoard):
     def stringRepresentation(self, board):
         return board.tobytes()
 
+    def filter_legal_moves(self, board):
+        """ Returns list of valid moves, that is filtered list of legal_moves excluding None items """
+        return self.get_legal_moves(board, 1)
+
     def getActionSize(self):
         return 72
 

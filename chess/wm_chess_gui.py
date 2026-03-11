@@ -127,7 +127,8 @@ class WMChessGUI:
         self.clock = pygame.time.Clock()
 
         # background image
-        base_folder = os.path.dirname(__file__)
+        # base_folder = os.path.dirname(__file__)
+        base_folder = r'C:\Users\qq162\Desktop\alpha-zero-general\chess'
         self.background_img = pygame.image.load(
             os.path.join(base_folder, 'assets/watermelon.png')).convert()
 
@@ -165,11 +166,13 @@ class WMChessGUI:
                                 self.human_move = MOVE_TO_INDEX_DICT[self.human_move]
                                 self.set_is_human(False)
                                 self.board, self.current_player, count = self.play_state.getNextState(self.board,
-                                                                                               self.current_player,
-                                                                                               self.human_move)
-                                _, v = n1.predict(from_array_to_input(self.play_state.getCanonicalForm(self.board, self.human_color)))
+                                                                                                      self.current_player,
+                                                                                                      self.human_move)
+                                _, v = n1.predict(
+                                    from_array_to_input(self.play_state.getCanonicalForm(self.board, self.human_color)))
                                 print(f"当前Human Color是{self.human_color}, v = {v}, 吃了 {count} 个子")
-                                _, v = n1.predict(from_array_to_input(self.play_state.getCanonicalForm(self.board, -self.human_color)))
+                                _, v = n1.predict(from_array_to_input(
+                                    self.play_state.getCanonicalForm(self.board, -self.human_color)))
                                 print(f"当前AI Color是{-self.human_color}, v = {v}")
                             else:
                                 self.board[
@@ -181,7 +184,7 @@ class WMChessGUI:
                     x = self.play_state.getCanonicalForm(self.board, self.current_player)
                     action = np.argmax(self.mcts_player.getActionProb(x, temp=0))
                     self.board, self.current_player, c = self.play_state.getNextState(self.board, self.current_player,
-                                                                                   action)
+                                                                                      action)
                     self.is_human = True
                     print(f"🌿 吃了 {c} 个子")
                     # self.mcts_player.print(x)
@@ -244,8 +247,9 @@ if __name__ == '__main__':
 
     g = Game()
     n1 = NNet(g)
-    n1.load_checkpoint('/Users/tenghao/Desktop/alpha-zero-general/temp', 'best.pth.tar')
-    args1 = dotdict({'numMCTSSims': 25, 'cpuct': 2.0})
+    n1.load_checkpoint(r'C:\Users\qq162\Desktop\alpha-zero-general\temp', 'best.pth.tar')
+    args1 = dotdict({'numMCTSSims': 500, 'cpuct': 1.8, 'epsilon': 0.0,
+                     'dirAlpha': 0.0, })
     mcts1 = MCTS(g, n1, args1)
     wm = WMChessGUI(mcts1, g)
     wm.start()

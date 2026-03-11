@@ -1,7 +1,8 @@
 *.pyc
 .DS_Store
 
-/temp/
+/temp_sim100_1.8_500_maxstep/
+/temp_sim25_1.8_500_maxstep/
 /.project
 /.pydevproject
 

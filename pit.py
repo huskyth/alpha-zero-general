@@ -18,14 +18,16 @@ g = Game()
 # nnet players
 
 n1 = NNet(g)
-n1.load_checkpoint('./temp', 'best.pth.tar')
-args1 = dotdict({'numMCTSSims': 25, 'cpuct': 2.0})
+n1.load_checkpoint('./temp_sim100_1.8_500_maxstep', 'best.pth.tar')
+args1 = dotdict({'numMCTSSims': 500, 'cpuct': 1.8, 'epsilon': 0.0,
+                 'dirAlpha': 0.0, })
 mcts1 = MCTS(g, n1, args1)
 n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 
 n2 = NNet(g)
-# n2.load_checkpoint('./temp', 'best.pth.tar')
-args2 = dotdict({'numMCTSSims': 25, 'cpuct': 2.0})
+n2.load_checkpoint('./temp_sim25_1.8_500_maxstep', 'best.pth.tar')
+args2 = dotdict({'numMCTSSims': 500, 'cpuct': 1.8, 'epsilon': 0.0,
+                 'dirAlpha': 0.0, })
 mcts2 = MCTS(g, n2, args2)
 n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
 
@@ -33,4 +35,4 @@ player2 = n2p
 
 arena = Arena.Arena(n1p, player2, g)
 
-print(arena.playGames(40, verbose=False))
+print(arena.playGames(100, verbose=False))

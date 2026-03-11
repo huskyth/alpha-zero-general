@@ -14,18 +14,21 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 args = dotdict({
     'numIters': 1000,
     'numEps': 100,  # Number of complete self-play games to simulate during a new iteration.
-    'tempThreshold': 150,  #
+    'tempThreshold': 350,  #
     'updateThreshold': 0.6,
     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-    'numMCTSSims': 425,  # Number of games moves for MCTS to simulate.
+    'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
     'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 1.8,
 
-    'checkpoint': './temp/',
+    'checkpoint': './temp_sim100_1.8_500_maxstep/',
     'load_model': False,
-    'load_folder_file': ('./temp', 'best.pth.tar'),
+    'load_folder_file': ('./temp_sim100_1.8_500_maxstep', 'best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
+
+    'epsilon': 0.0,
+    'dirAlpha': 0.0,
 
 })
 
