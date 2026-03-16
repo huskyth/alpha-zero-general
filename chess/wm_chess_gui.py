@@ -247,7 +247,7 @@ if __name__ == '__main__':
 
     g = Game()
     n1 = NNet(g)
-    n1.load_checkpoint(r'C:\Users\qq162\Desktop\alpha-zero-general\temp', 'best.pth.tar')
+    n1.load_checkpoint(r'C:\Users\qq162\Desktop\alpha-zero-general\temp_sim100_1.8_500_maxstep', 'best.pth.tar')
     args1 = dotdict({'numMCTSSims': 500, 'cpuct': 1.8, 'epsilon': 0.0,
                      'dirAlpha': 0.0, })
     mcts1 = MCTS(g, n1, args1)
